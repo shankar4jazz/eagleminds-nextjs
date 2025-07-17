@@ -1,407 +1,480 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { AdminLayout } from "@/components/admin/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Eye, Search } from "lucide-react";
-import { Page } from "@/types";
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  Search,
+  Filter,
+  Save,
+  X,
+  FileText,
+  Globe,
+  Calendar,
+  User
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface Page {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  metaTitle?: string;
+  metaDesc?: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  createdAt: Date;
+  updatedAt: Date;
+  author: {
+    name: string;
+    email: string;
+  };
+}
 
 export default function AdminPagesPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('ALL');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingPage, setEditingPage] = useState<Page | null>(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    content: '',
+    metaTitle: '',
+    metaDesc: '',
+    status: 'DRAFT' as const
+  });
 
   useEffect(() => {
-    if (status === "loading") return;
-    
-    if (!session) {
-      router.push("/admin/login");
-      return;
-    }
-
-    const userRole = session.user?.role;
-    if (!userRole || !["ADMIN", "CONTENT_MANAGER"].includes(userRole)) {
-      router.push("/admin/login");
-      return;
-    }
-
     fetchPages();
-  }, [session, status, router]);
+  }, []);
 
   const fetchPages = async () => {
     try {
       setLoading(true);
-      // This would be replaced with actual API call
-      // const response = await fetch('/api/admin/pages');
-      // const data = await response.json();
-      
-      // Mock data for demonstration
+      // Mock data - replace with actual API call
       const mockPages: Page[] = [
         {
-          id: "1",
-          title: "Homepage",
-          slug: "home",
-          content: "Welcome to EagleMinds Technologies...",
-          metaTitle: "EagleMinds Technologies - Web Development & SaaS Solutions",
-          metaDesc: "Modern web development and SaaS solutions",
-          status: "PUBLISHED",
-          authorId: "1",
-          createdAt: new Date("2024-01-15"),
-          updatedAt: new Date("2024-01-20"),
-          author: {
-            id: "1",
-            email: "admin@eagleminds.net",
-            name: "Admin User",
-            role: "ADMIN",
-            createdAt: new Date("2024-01-01"),
-            updatedAt: new Date("2024-01-01"),
-          }
+          id: '1',
+          title: 'Home Page',
+          slug: 'home',
+          content: 'Welcome to EagleMinds Technologies - Your premier destination for cutting-edge web development and digital solutions.',
+          metaTitle: 'EagleMinds Technologies - Modern Web Development',
+          metaDesc: 'Leading web development company specializing in modern solutions',
+          status: 'PUBLISHED',
+          createdAt: new Date('2024-01-15'),
+          updatedAt: new Date('2024-01-16'),
+          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
         },
         {
-          id: "2",
-          title: "About Us",
-          slug: "about",
-          content: "EagleMinds Technologies was founded...",
-          metaTitle: "About EagleMinds Technologies",
-          metaDesc: "Learn about our company, mission, and values",
-          status: "PUBLISHED",
-          authorId: "1",
-          createdAt: new Date("2024-01-10"),
-          updatedAt: new Date("2024-01-15"),
-          author: {
-            id: "1",
-            email: "admin@eagleminds.net",
-            name: "Admin User",
-            role: "ADMIN",
-            createdAt: new Date("2024-01-01"),
-            updatedAt: new Date("2024-01-01"),
-          }
+          id: '2',
+          title: 'About Us',
+          slug: 'about',
+          content: 'Learn more about our company, our mission, and our dedicated team of professionals.',
+          metaTitle: 'About EagleMinds Technologies',
+          metaDesc: 'Meet our team and learn about our mission',
+          status: 'PUBLISHED',
+          createdAt: new Date('2024-01-14'),
+          updatedAt: new Date('2024-01-15'),
+          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
         },
         {
-          id: "3",
-          title: "Privacy Policy",
-          slug: "privacy",
-          content: "This privacy policy explains...",
-          metaTitle: "Privacy Policy - EagleMinds Technologies",
-          metaDesc: "Our privacy policy and data protection practices",
-          status: "DRAFT",
-          authorId: "1",
-          createdAt: new Date("2024-01-12"),
-          updatedAt: new Date("2024-01-12"),
-          author: {
-            id: "1",
-            email: "admin@eagleminds.net",
-            name: "Admin User",
-            role: "ADMIN",
-            createdAt: new Date("2024-01-01"),
-            updatedAt: new Date("2024-01-01"),
-          }
+          id: '3',
+          title: 'Services',
+          slug: 'services',
+          content: 'Explore our comprehensive range of web development and digital services.',
+          metaTitle: 'Our Services - Web Development & More',
+          metaDesc: 'Comprehensive web development and digital solutions',
+          status: 'PUBLISHED',
+          createdAt: new Date('2024-01-13'),
+          updatedAt: new Date('2024-01-14'),
+          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
+        },
+        {
+          id: '4',
+          title: 'Contact',
+          slug: 'contact',
+          content: 'Get in touch with our team for your web development needs.',
+          metaTitle: 'Contact EagleMinds Technologies',
+          metaDesc: 'Contact us for your web development needs',
+          status: 'DRAFT',
+          createdAt: new Date('2024-01-12'),
+          updatedAt: new Date('2024-01-13'),
+          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
         }
       ];
-      
       setPages(mockPages);
     } catch (error) {
-      console.error("Failed to fetch pages:", error);
+      console.error('Error fetching pages:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeletePage = async (pageId: string) => {
-    if (confirm("Are you sure you want to delete this page?")) {
+  const handleCreate = async () => {
+    try {
+      const newPage: Page = {
+        id: Date.now().toString(),
+        ...formData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        author: { name: 'Admin User', email: 'admin@eagleminds.com' }
+      };
+      setPages([...pages, newPage]);
+      setShowCreateModal(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error creating page:', error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editingPage) return;
+    
+    try {
+      const updatedPages = pages.map(page => 
+        page.id === editingPage.id 
+          ? { ...page, ...formData, updatedAt: new Date() }
+          : page
+      );
+      setPages(updatedPages);
+      setEditingPage(null);
+      resetForm();
+    } catch (error) {
+      console.error('Error updating page:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this page?')) {
       try {
-        // This would be replaced with actual API call
-        // await fetch(`/api/admin/pages/${pageId}`, { method: 'DELETE' });
-        
-        setPages(pages.filter(page => page.id !== pageId));
+        setPages(pages.filter(page => page.id !== id));
       } catch (error) {
-        console.error("Failed to delete page:", error);
+        console.error('Error deleting page:', error);
       }
     }
   };
 
-  const handleStatusChange = async (pageId: string, newStatus: string) => {
-    try {
-      // This would be replaced with actual API call
-      // await fetch(`/api/admin/pages/${pageId}`, {
-      //   method: 'PATCH',
-      //   body: JSON.stringify({ status: newStatus })
-      // });
-      
-      setPages(pages.map(page => 
-        page.id === pageId ? { ...page, status: newStatus as any } : page
-      ));
-    } catch (error) {
-      console.error("Failed to update page status:", error);
-    }
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      slug: '',
+      content: '',
+      metaTitle: '',
+      metaDesc: '',
+      status: 'DRAFT'
+    });
+  };
+
+  const openEditModal = (page: Page) => {
+    setEditingPage(page);
+    setFormData({
+      title: page.title,
+      slug: page.slug,
+      content: page.content,
+      metaTitle: page.metaTitle || '',
+      metaDesc: page.metaDesc || '',
+      status: page.status
+    });
   };
 
   const filteredPages = pages.filter(page => {
     const matchesSearch = page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          page.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || page.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesFilter = filterStatus === 'ALL' || page.status === filterStatus;
+    return matchesSearch && matchesFilter;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "PUBLISHED": return "bg-green-100 text-green-800";
-      case "DRAFT": return "bg-yellow-100 text-yellow-800";
-      case "ARCHIVED": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case 'PUBLISHED': return 'bg-green-100 text-green-800';
+      case 'DRAFT': return 'bg-yellow-100 text-yellow-800';
+      case 'ARCHIVED': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (status === "loading" || loading) {
-    return <div className="p-8">Loading...</div>;
-  }
-
-  if (!session) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-8">
-        <div className="flex justify-between items-center mb-8">
+    <AdminLayout title="Pages Management">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Pages Management</h1>
-            <p className="text-gray-600 mt-2">Manage website pages and content</p>
+            <h1 className="text-2xl font-bold text-gray-900">Pages Management</h1>
+            <p className="text-gray-600">Create, edit, and manage your website pages</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
-                New Page
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create New Page</DialogTitle>
-              </DialogHeader>
-              <PageForm onClose={() => setIsDialogOpen(false)} onSave={fetchPages} />
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Page
+          </Button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search pages..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search pages..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-gray-400" />
+                <select 
+                  value={filterStatus} 
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="ALL">All Status</option>
+                  <option value="PUBLISHED">Published</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="ARCHIVED">Archived</option>
+                </select>
               </div>
             </div>
-            <div className="w-full sm:w-48">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="PUBLISHED">Published</SelectItem>
-                  <SelectItem value="DRAFT">Draft</SelectItem>
-                  <SelectItem value="ARCHIVED">Archived</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Pages List */}
-        <div className="grid gap-6">
-          {filteredPages.map((page) => (
-            <Card key={page.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl">{page.title}</CardTitle>
-                    <p className="text-gray-600 mt-1">/{page.slug}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(page.status)}>
-                      {page.status}
-                    </Badge>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleDeletePage(page.id)}
+        {/* Pages Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pages ({filteredPages.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full table-auto">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Page</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Author</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Updated</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPages.map((page) => (
+                      <motion.tr 
+                        key={page.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-gray-100 hover:bg-gray-50"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{page.title}</p>
+                              <p className="text-sm text-gray-500">/{page.slug}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(page.status)}`}>
+                            {page.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <User className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">{page.author.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">
+                              {page.updatedAt.toLocaleDateString()}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.open(`/${page.slug}`, '_blank')}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => openEditModal(page)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDelete(page.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Create/Edit Modal */}
+        <AnimatePresence>
+          {(showCreateModal || editingPage) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold">
+                      {editingPage ? 'Edit Page' : 'Create New Page'}
+                    </h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowCreateModal(false);
+                        setEditingPage(null);
+                        resetForm();
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">Page Title</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        placeholder="Enter page title"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="slug">URL Slug</Label>
+                      <Input
+                        id="slug"
+                        value={formData.slug}
+                        onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                        placeholder="page-url-slug"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="content">Page Content</Label>
+                      <Textarea
+                        id="content"
+                        value={formData.content}
+                        onChange={(e) => setFormData({...formData, content: e.target.value})}
+                        placeholder="Enter page content"
+                        rows={6}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="metaTitle">Meta Title</Label>
+                      <Input
+                        id="metaTitle"
+                        value={formData.metaTitle}
+                        onChange={(e) => setFormData({...formData, metaTitle: e.target.value})}
+                        placeholder="SEO meta title"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="metaDesc">Meta Description</Label>
+                      <Textarea
+                        id="metaDesc"
+                        value={formData.metaDesc}
+                        onChange={(e) => setFormData({...formData, metaDesc: e.target.value})}
+                        placeholder="SEO meta description"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="status">Status</Label>
+                      <select
+                        id="status"
+                        value={formData.status}
+                        onChange={(e) => setFormData({...formData, status: e.target.value as any})}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="DRAFT">Draft</option>
+                        <option value="PUBLISHED">Published</option>
+                        <option value="ARCHIVED">Archived</option>
+                      </select>
                     </div>
                   </div>
+
+                  <div className="flex justify-end space-x-4 mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowCreateModal(false);
+                        setEditingPage(null);
+                        resetForm();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={editingPage ? handleUpdate : handleCreate}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {editingPage ? 'Update' : 'Create'} Page
+                    </Button>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4 line-clamp-2">
-                  {page.content.substring(0, 200)}...
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>By {page.author?.name}</span>
-                  <span>Updated: {page.updatedAt.toLocaleDateString()}</span>
-                </div>
-                <div className="mt-4">
-                  <Select 
-                    value={page.status} 
-                    onValueChange={(value) => handleStatusChange(page.id, value)}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="DRAFT">Draft</SelectItem>
-                      <SelectItem value="PUBLISHED">Published</SelectItem>
-                      <SelectItem value="ARCHIVED">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredPages.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No pages found.</p>
-          </div>
-        )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
-  );
-}
-
-function PageForm({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
-  const [formData, setFormData] = useState({
-    title: "",
-    slug: "",
-    content: "",
-    metaTitle: "",
-    metaDesc: "",
-    status: "DRAFT"
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      // This would be replaced with actual API call
-      // await fetch('/api/admin/pages', {
-      //   method: 'POST',
-      //   body: JSON.stringify(formData)
-      // });
-      
-      onSave();
-      onClose();
-    } catch (error) {
-      console.error("Failed to create page:", error);
-    }
-  };
-
-  const handleSlugGeneration = (title: string) => {
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    setFormData(prev => ({ ...prev, slug }));
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="title">Page Title</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => {
-            setFormData(prev => ({ ...prev, title: e.target.value }));
-            handleSlugGeneration(e.target.value);
-          }}
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="slug">URL Slug</Label>
-        <Input
-          id="slug"
-          value={formData.slug}
-          onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="content">Content</Label>
-        <Textarea
-          id="content"
-          value={formData.content}
-          onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-          rows={6}
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="metaTitle">Meta Title</Label>
-        <Input
-          id="metaTitle"
-          value={formData.metaTitle}
-          onChange={(e) => setFormData(prev => ({ ...prev, metaTitle: e.target.value }))}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="metaDesc">Meta Description</Label>
-        <Textarea
-          id="metaDesc"
-          value={formData.metaDesc}
-          onChange={(e) => setFormData(prev => ({ ...prev, metaDesc: e.target.value }))}
-          rows={3}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="DRAFT">Draft</SelectItem>
-            <SelectItem value="PUBLISHED">Published</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit">Create Page</Button>
-      </div>
-    </form>
+    </AdminLayout>
   );
 }
