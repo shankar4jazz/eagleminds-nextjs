@@ -12,7 +12,7 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden">
       <Navigation />
       
-      {/* Hero Section - Latest Trendy Design */}
+      {/* Hero Section - Text Left, Animated Image Right */}
       <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
@@ -25,83 +25,227 @@ export default function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col items-center justify-center min-h-screen text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="mb-8"
-            >
-              <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8">
-                <Sparkles className="w-4 h-4 mr-2 text-yellow-400" />
-                <span className="text-sm font-medium text-white">Transforming Ideas into Digital Reality</span>
-              </div>
-            </motion.div>
+          <div className="flex flex-col lg:flex-row items-center justify-between min-h-screen gap-12 py-20">
+            
+            {/* Left Side - Text Content */}
+            <div className="flex-1 text-left max-w-2xl">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="mb-8"
+              >
+                <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8">
+                  <Sparkles className="w-4 h-4 mr-2 text-yellow-400" />
+                  <span className="text-sm font-medium text-white">Transforming Ideas into Digital Reality</span>
+                </div>
+              </motion.div>
 
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-6xl md:text-8xl font-bold text-white mb-6 leading-none"
-            >
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                EagleMinds
-              </span>
-              <br />
-              <span className="text-white/90">Technologies</span>
-            </motion.h1>
+              <motion.h1 
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
+              >
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  EagleMinds
+                </span>
+                <br />
+                <span className="text-white/90">Technologies</span>
+              </motion.h1>
 
-            <motion.p 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xl md:text-2xl text-white/80 mb-12 max-w-4xl mx-auto leading-relaxed"
-            >
-              We craft cutting-edge digital solutions with AI-powered development, 
-              cloud-native architecture, and modern user experiences that drive business growth.
-            </motion.p>
+              <motion.p 
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-xl md:text-2xl text-white/80 mb-12 leading-relaxed"
+              >
+                We craft cutting-edge digital solutions with AI-powered development, 
+                cloud-native architecture, and modern user experiences that drive business growth.
+              </motion.p>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 mb-16"
-            >
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-full shadow-2xl" asChild>
-                <Link href="/services/request">
-                  <Rocket className="mr-2 h-5 w-5" />
-                  Start Your Project
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-full backdrop-blur-sm" asChild>
-                <Link href="/services">
-                  <Target className="mr-2 h-5 w-5" />
-                  Explore Services
-                </Link>
-              </Button>
-            </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="flex flex-col sm:flex-row gap-4 mb-16"
+              >
+                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-full shadow-2xl" asChild>
+                  <Link href="/services/request">
+                    <Rocket className="mr-2 h-5 w-5" />
+                    Start Your Project
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-full backdrop-blur-sm" asChild>
+                  <Link href="/services">
+                    <Target className="mr-2 h-5 w-5" />
+                    Explore Services
+                  </Link>
+                </Button>
+              </motion.div>
 
-            {/* Modern Stats with Glassmorphism */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto"
-            >
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-                <div className="text-4xl font-bold text-white mb-2">50+</div>
-                <div className="text-white/70">Projects Delivered</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-                <div className="text-4xl font-bold text-white mb-2">98%</div>
-                <div className="text-white/70">Client Satisfaction</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-                <div className="text-4xl font-bold text-white mb-2">24/7</div>
-                <div className="text-white/70">Expert Support</div>
-              </div>
-            </motion.div>
+              {/* Modern Stats with Glassmorphism */}
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+              >
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
+                  <div className="text-4xl font-bold text-white mb-2">50+</div>
+                  <div className="text-white/70">Projects Delivered</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
+                  <div className="text-4xl font-bold text-white mb-2">98%</div>
+                  <div className="text-white/70">Client Satisfaction</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
+                  <div className="text-4xl font-bold text-white mb-2">24/7</div>
+                  <div className="text-white/70">Expert Support</div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Side - Animated Image/Visual */}
+            <div className="flex-1 flex items-center justify-center">
+              <motion.div
+                initial={{ opacity: 0, x: 50, scale: 0.8 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 1, delay: 0.3 }}
+                className="relative w-full max-w-2xl"
+              >
+                {/* Main Animated Container */}
+                <div className="relative">
+                  {/* Central Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+                  
+                  {/* Floating Elements */}
+                  <motion.div
+                    animate={{ 
+                      y: [0, -20, 0],
+                      rotate: [0, 360],
+                    }}
+                    transition={{
+                      duration: 6,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute top-10 left-10 w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-2xl"
+                  >
+                    <Code className="w-8 h-8 text-white" />
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ 
+                      y: [0, 20, 0],
+                      rotate: [0, -360],
+                    }}
+                    transition={{
+                      duration: 8,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 1
+                    }}
+                    className="absolute top-20 right-20 w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl"
+                  >
+                    <Database className="w-10 h-10 text-white" />
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ 
+                      y: [0, -15, 0],
+                      x: [0, 10, 0],
+                    }}
+                    transition={{
+                      duration: 7,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 2
+                    }}
+                    className="absolute bottom-20 left-16 w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-2xl"
+                  >
+                    <Globe className="w-7 h-7 text-white" />
+                  </motion.div>
+
+                  <motion.div
+                    animate={{ 
+                      y: [0, 25, 0],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 0.5
+                    }}
+                    className="absolute bottom-10 right-10 w-18 h-18 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-2xl"
+                  >
+                    <Zap className="w-8 h-8 text-white" />
+                  </motion.div>
+
+                  {/* Central Main Visual */}
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                      rotate: [0, 2, 0, -2, 0],
+                    }}
+                    transition={{
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="relative z-10 w-80 h-80 mx-auto"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-purple-600/30 rounded-full blur-2xl"></div>
+                    <div className="relative w-full h-full bg-gradient-to-br from-slate-800/50 to-gray-900/50 rounded-full border border-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <div className="w-60 h-60 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full border border-white/10 flex items-center justify-center">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: "linear"
+                          }}
+                          className="w-40 h-40 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-2xl"
+                        >
+                          <motion.div
+                            animate={{ rotate: -360 }}
+                            transition={{
+                              duration: 15,
+                              repeat: Infinity,
+                              ease: "linear"
+                            }}
+                          >
+                            <Sparkles className="w-16 h-16 text-white" />
+                          </motion.div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Orbital Rings */}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 30,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    className="absolute inset-0 border-2 border-white/10 rounded-full"
+                  />
+                  <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{
+                      duration: 40,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    className="absolute inset-4 border border-white/5 rounded-full"
+                  />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
 
