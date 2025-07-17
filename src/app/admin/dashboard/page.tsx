@@ -54,72 +54,213 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Pages</p>
+                  <p className="text-2xl font-bold">12</p>
+                </div>
+                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 text-sm">📄</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Services</p>
+                  <p className="text-2xl font-bold">6</p>
+                </div>
+                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-sm">⚙️</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">New Leads</p>
+                  <p className="text-2xl font-bold">8</p>
+                </div>
+                <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <span className="text-yellow-600 text-sm">👥</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                  <p className="text-2xl font-bold">24%</p>
+                </div>
+                <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-purple-600 text-sm">📈</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Management Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle>Pages</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                📄 Pages
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
                 Manage website pages and content
               </p>
-              <Button
-                onClick={() => router.push("/admin/pages")}
-                className="w-full"
-              >
-                Manage Pages
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => router.push("/admin/pages")}
+                  className="w-full"
+                  size="sm"
+                >
+                  Manage Pages
+                </Button>
+                <div className="text-xs text-gray-500">
+                  12 pages • 8 published
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle>Services</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                ⚙️ Services
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
                 Configure services and offerings
               </p>
-              <Button
-                onClick={() => router.push("/admin/services")}
-                className="w-full"
-              >
-                Manage Services
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => router.push("/admin/services")}
+                  className="w-full"
+                  size="sm"
+                >
+                  Manage Services
+                </Button>
+                <div className="text-xs text-gray-500">
+                  6 services • 6 active
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle>Leads</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                👥 Leads
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
                 View and manage customer leads
               </p>
-              <Button
-                onClick={() => router.push("/admin/leads")}
-                className="w-full"
-              >
-                View Leads
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => router.push("/admin/leads")}
+                  className="w-full"
+                  size="sm"
+                >
+                  View Leads
+                </Button>
+                <div className="text-xs text-gray-500">
+                  8 new • 24% conversion
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle>Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                ⚙️ Settings
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
                 Configure system settings
               </p>
-              <Button
-                onClick={() => router.push("/admin/settings")}
-                className="w-full"
-              >
-                Settings
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => router.push("/admin/settings")}
+                  className="w-full"
+                  size="sm"
+                >
+                  Settings
+                </Button>
+                <div className="text-xs text-gray-500">
+                  System configuration
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-sm">👥</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">New lead from John Smith</p>
+                      <p className="text-sm text-gray-600">Web Development inquiry</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-500">2 hours ago</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="text-green-600 text-sm">📄</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">Page "About Us" updated</p>
+                      <p className="text-sm text-gray-600">Content changes published</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-500">5 hours ago</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <span className="text-yellow-600 text-sm">⚙️</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">New service "Cloud Migration" added</p>
+                      <p className="text-sm text-gray-600">Service published to website</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-500">1 day ago</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
