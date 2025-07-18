@@ -1,10 +1,11 @@
+// Development schema with SQLite
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -78,8 +79,8 @@ model Service {
   name        String
   slug        String   @unique
   description String
-  features    Json
-  pricing     Json
+  features    String   // JSON as string for SQLite
+  pricing     String   // JSON as string for SQLite
   image       String?
   status      Status   @default(DRAFT)
   createdAt   DateTime @default(now())
