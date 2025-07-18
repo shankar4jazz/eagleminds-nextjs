@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:cloudflare": "DEPLOY_TARGET=cloudflare next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "deploy:vercel": "vercel",
+    "deploy:cloudflare": "DEPLOY_TARGET=cloudflare npm run build && npx wrangler pages deploy out"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

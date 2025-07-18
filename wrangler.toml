@@ -1,0 +1,13 @@
+name = "eagleminds-nextjs"
+compatibility_date = "2025-07-18"
+pages_build_output_dir = "out"
+
+[env.production]
+name = "eagleminds-nextjs"
+
+[[env.production.vars]]
+# Add your environment variables here
+NEXTAUTH_URL = "https://eagleminds-nextjs.pages.dev"
+
+[build]
+command = "npm run build"
