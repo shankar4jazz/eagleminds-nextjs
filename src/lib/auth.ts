@@ -9,6 +9,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/admin/login",
   },
@@ -32,6 +33,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
+            console.log("User not found:", credentials.email);
             return null;
           }
 
@@ -41,6 +43,7 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordValid) {
+            console.log("Invalid password for user:", credentials.email);
             return null;
           }
 
@@ -52,6 +55,11 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error("Auth error:", error);
+          // Log more details about the error
+          if (error instanceof Error) {
+            console.error("Error message:", error.message);
+            console.error("Error stack:", error.stack);
+          }
           return null;
         }
       },
