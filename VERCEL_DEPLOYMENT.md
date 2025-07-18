@@ -12,10 +12,16 @@ Go to your Vercel dashboard → Project → Settings → Environment Variables a
 ### Required Variables:
 
 ```
-DATABASE_URL = postgresql://username:password@hostname:port/database?sslmode=require
-NEXTAUTH_URL = https://your-domain.vercel.app
-NEXTAUTH_SECRET = your-super-secure-random-string-here
+DATABASE_URL = postgresql://postgres:Eagleminds@123@139.84.133.107:5432/eagleminds?sslmode=prefer
+NEXTAUTH_URL = https://eagleminds-nextjs.vercel.app
+NEXTAUTH_SECRET = [generate with: openssl rand -base64 32]
 ```
+
+### Generate NEXTAUTH_SECRET:
+```bash
+openssl rand -base64 32
+```
+Copy the output and use it as your NEXTAUTH_SECRET value.
 
 ### How to get DATABASE_URL:
 
