@@ -11,7 +11,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "deploy:vercel": "vercel",
-    "deploy:cloudflare": "DEPLOY_TARGET=cloudflare npm run build && npx wrangler pages deploy out"
+    "deploy:cloudflare": "DEPLOY_TARGET=cloudflare npm run build && npx wrangler pages deploy out --project-name=eagleminds-nextjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
