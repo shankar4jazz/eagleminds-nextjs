@@ -1,22 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { AdminLayout } from "@/components/admin/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Mail, Shield, Database, Globe } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Settings, 
+  Mail, 
+  Shield, 
+  Database, 
+  Globe, 
+  Save,
+  CheckCircle,
+  AlertCircle,
+  Bell,
+  Key
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function AdminSettingsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [savedSection, setSavedSection] = useState<string | null>(null);
   const [settings, setSettings] = useState({
     site: {
       name: "EagleMinds Technologies",
@@ -60,22 +70,9 @@ export default function AdminSettingsPage() {
   });
 
   useEffect(() => {
-    if (status === "loading") return;
-    
-    if (!session) {
-      router.push("/admin/login");
-      return;
-    }
-
-    const userRole = session.user?.role;
-    if (!userRole || userRole !== "ADMIN") {
-      router.push("/admin/dashboard");
-      return;
-    }
-
     // Load settings would go here
     // fetchSettings();
-  }, [session, status, router]);
+  }, []);
 
   const handleSaveSettings = async (section: string) => {
     try {
@@ -88,7 +85,8 @@ export default function AdminSettingsPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Show success message
-      alert(`${section} settings saved successfully!`);
+      setSavedSection(section);
+      setTimeout(() => setSavedSection(null), 3000);
     } catch (error) {
       console.error("Failed to save settings:", error);
       alert("Failed to save settings. Please try again.");
@@ -107,20 +105,19 @@ export default function AdminSettingsPage() {
     }));
   };
 
-  if (status === "loading") {
-    return <div className="p-8">Loading...</div>;
-  }
-
-  if (!session) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">System Settings</h1>
-          <p className="text-gray-600 mt-2">Configure your application settings</p>
+    <AdminLayout title="System Settings">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
+            <p className="text-gray-600">Configure your application settings</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Settings className="h-5 w-5 text-gray-400" />
+            <span className="text-sm text-gray-500">Admin Only</span>
+          </div>
         </div>
 
         <Tabs defaultValue="site" className="space-y-6">
@@ -187,8 +184,24 @@ export default function AdminSettingsPage() {
                 <Button 
                   onClick={() => handleSaveSettings('site')}
                   disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? "Saving..." : "Save Site Settings"}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : savedSection === 'site' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Site Settings
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -233,8 +246,24 @@ export default function AdminSettingsPage() {
                 <Button 
                   onClick={() => handleSaveSettings('contact')}
                   disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? "Saving..." : "Save Contact Settings"}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : savedSection === 'contact' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Contact Settings
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -307,8 +336,24 @@ export default function AdminSettingsPage() {
                 <Button 
                   onClick={() => handleSaveSettings('email')}
                   disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? "Saving..." : "Save Email Settings"}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : savedSection === 'email' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Email Settings
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -319,7 +364,7 @@ export default function AdminSettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
+                  <Bell className="w-5 h-5" />
                   Notification Preferences
                 </CardTitle>
               </CardHeader>
@@ -371,8 +416,24 @@ export default function AdminSettingsPage() {
                 <Button 
                   onClick={() => handleSaveSettings('notifications')}
                   disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? "Saving..." : "Save Notification Settings"}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : savedSection === 'notifications' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Notification Settings
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -383,7 +444,7 @@ export default function AdminSettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
+                  <Key className="w-5 h-5" />
                   Security Configuration
                 </CardTitle>
               </CardHeader>
@@ -436,8 +497,24 @@ export default function AdminSettingsPage() {
                 <Button 
                   onClick={() => handleSaveSettings('security')}
                   disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? "Saving..." : "Save Security Settings"}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : savedSection === 'security' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Security Settings
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -497,14 +574,30 @@ export default function AdminSettingsPage() {
                 <Button 
                   onClick={() => handleSaveSettings('integrations')}
                   disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? "Saving..." : "Save Integration Settings"}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saving...
+                    </>
+                  ) : savedSection === 'integrations' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Integration Settings
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

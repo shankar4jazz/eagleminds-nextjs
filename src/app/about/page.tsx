@@ -421,13 +421,13 @@ export default function AboutPage() {
               <span className="text-sm font-medium">Ready to Partner?</span>
             </div>
             <h2 className="text-5xl md:text-6xl font-bold mb-6">
-              Let's Create Something
+              Let&apos;s Create Something
               <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                 Amazing Together
               </span>
             </h2>
             <p className="text-xl mb-12 max-w-3xl mx-auto opacity-90">
-              Join us in building the future of technology. Let's transform your vision into reality 
+              Join us in building the future of technology. Let&apos;s transform your vision into reality 
               with innovative solutions and expert craftsmanship.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">

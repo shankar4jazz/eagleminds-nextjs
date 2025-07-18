@@ -109,7 +109,7 @@ export default function ServiceForm() {
   const onSubmit = async (data: ServiceFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/leads", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@ Budget: ${data.budget}
 Timeline: ${data.timeline}
 Features: ${data.features.join(", ")}
 Priority: ${data.priority}`,
-          source: "SERVICE_FORM",
+          source: "service_request",
         }),
       });
 

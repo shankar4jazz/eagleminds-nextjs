@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Code, Database, Globe, Shield, Zap, Users, CheckCircle, Star, TrendingUp, Sparkles, Rocket, Target, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,75 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Navigation } from "@/components/navigation";
 import { motion } from "framer-motion";
 
+interface Service {
+  id?: string;
+  name?: string;
+  title?: string;
+  slug?: string;
+  description: string;
+  features: string[];
+  pricing?: {
+    price?: number;
+    startingPrice?: number;
+    currency: string;
+    billingType?: string;
+  };
+  image?: string | null;
+  status?: string;
+  // Fallback service properties
+  icon?: any;
+  gradient?: string;
+  price?: string;
+}
+
+const getServiceIcon = (serviceName: string) => {
+  if (serviceName.toLowerCase().includes('web')) return Code;
+  if (serviceName.toLowerCase().includes('mobile') || serviceName.toLowerCase().includes('app')) return Globe;
+  if (serviceName.toLowerCase().includes('database') || serviceName.toLowerCase().includes('data')) return Database;
+  if (serviceName.toLowerCase().includes('cloud') || serviceName.toLowerCase().includes('migration')) return Zap;
+  if (serviceName.toLowerCase().includes('security') || serviceName.toLowerCase().includes('compliance')) return Shield;
+  if (serviceName.toLowerCase().includes('consulting') || serviceName.toLowerCase().includes('strategy')) return Users;
+  return Code; // default
+};
+
+const getServiceGradient = (index: number) => {
+  const gradients = [
+    "from-blue-500 to-cyan-500",
+    "from-purple-500 to-pink-500", 
+    "from-green-500 to-emerald-500",
+    "from-orange-500 to-red-500",
+    "from-indigo-500 to-purple-500",
+    "from-yellow-500 to-orange-500"
+  ];
+  return gradients[index % gradients.length];
+};
+
 export default function ServicesPage() {
-  const services = [
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services');
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data.services);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      // Fallback to static data if API fails
+      setServices(fallbackServices);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback services in case API fails
+  const fallbackServices = [
     {
       icon: Code,
       title: "Web Development",
@@ -214,58 +282,70 @@ export default function ServicesPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="group"
-              >
-                <Card className="h-full bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-                  <CardHeader className="relative">
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${service.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                      <service.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-2xl text-gray-900">{service.title}</CardTitle>
-                      <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                        {service.price}
-                      </span>
-                    </div>
-                    <CardDescription className="text-gray-600 text-lg">
-                      {service.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 mb-6">
-                      {service.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center text-gray-700">
-                          <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                          <span className="font-medium">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex gap-3">
-                      <Button 
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full"
-                        asChild
-                      >
-                        <Link href="/services/request">
-                          Request This Service
-                        </Link>
-                      </Button>
-                      <Button variant="outline" className="rounded-full" asChild>
-                        <Link href="/contact">
-                          Learn More
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {(loading ? fallbackServices : services).map((service, index) => {
+              // For API services, use dynamic properties; for fallback, use static structure
+              const ServiceIcon = service.icon || getServiceIcon(service.name || service.title);
+              const serviceTitle = service.name || service.title;
+              const serviceDescription = service.description;
+              const serviceFeatures = service.features || [];
+              const serviceGradient = service.gradient || getServiceGradient(index);
+              const servicePrice = service.pricing 
+                ? `Starting at ${service.pricing.currency}${service.pricing.price || service.pricing.startingPrice}` 
+                : service.price || "Contact for pricing";
+
+              return (
+                <motion.div
+                  key={service.id || index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                  className="group"
+                >
+                  <Card className="h-full bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
+                    <CardHeader className="relative">
+                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${serviceGradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                        <ServiceIcon className="h-8 w-8 text-white" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-2xl text-gray-900">{serviceTitle}</CardTitle>
+                        <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                          {servicePrice}
+                        </span>
+                      </div>
+                      <CardDescription className="text-gray-600 text-lg">
+                        {serviceDescription}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-3 mb-6">
+                        {serviceFeatures.map((feature, idx) => (
+                          <li key={idx} className="flex items-center text-gray-700">
+                            <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                            <span className="font-medium">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="flex gap-3">
+                        <Button 
+                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full"
+                          asChild
+                        >
+                          <Link href="/services/request">
+                            Request This Service
+                          </Link>
+                        </Button>
+                        <Button variant="outline" className="rounded-full" asChild>
+                          <Link href="/contact">
+                            Learn More
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

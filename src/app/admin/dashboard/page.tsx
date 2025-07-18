@@ -1,45 +1,70 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AdminLayout } from "@/components/admin/admin-layout";
-import { 
-  TrendingUp, 
-  Users, 
-  FileText, 
-  Settings, 
+import { AnalyticsChart } from "@/components/admin/analytics-chart";
+import {
+  TrendingUp,
+  Users,
+  FileText,
+  Settings,
   Activity,
   Eye,
   BarChart3,
-  Clock
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  Plus,
+  RefreshCw
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState({
     totalPages: 0,
     activeServices: 0,
     newLeads: 0,
-    conversionRate: 0
+    conversionRate: 0,
+    totalViews: 0,
+    activeUsers: 0
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    // Fetch real stats from API
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
     try {
-      // This would be actual API calls
-      setStats({
-        totalPages: 12,
-        activeServices: 6,
-        newLeads: 8,
-        conversionRate: 24
-      });
+      setIsLoading(true);
+      
+      const response = await fetch('/api/admin/dashboard');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard stats');
+      }
+      
+      const data = await response.json();
+      setStats(data.stats);
     } catch (error) {
       console.error('Error fetching stats:', error);
+      // Fallback to default values on error
+      setStats({
+        totalPages: 0,
+        activeServices: 0,
+        newLeads: 0,
+        conversionRate: 0,
+        totalViews: 0,
+        activeUsers: 0
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -109,6 +134,13 @@ export default function AdminDashboard() {
     }
   ];
 
+  const analyticsData = [
+    { label: "Page Views", value: 1247, change: 12, changeType: "up" as const },
+    { label: "Unique Visitors", value: 934, change: 8, changeType: "up" as const },
+    { label: "Contact Forms", value: 23, change: 15, changeType: "up" as const },
+    { label: "Service Requests", value: 8, change: 3, changeType: "down" as const },
+  ];
+
   return (
     <AdminLayout title="Dashboard">
       <div className="space-y-8">
@@ -161,8 +193,18 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                     </div>
-                    <div className={`h-12 w-12 bg-${card.color}-100 rounded-full flex items-center justify-center`}>
-                      <card.icon className={`h-6 w-6 text-${card.color}-600`} />
+                    <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                      card.color === 'blue' ? 'bg-blue-100' :
+                      card.color === 'green' ? 'bg-green-100' :
+                      card.color === 'yellow' ? 'bg-yellow-100' :
+                      'bg-purple-100'
+                    }`}>
+                      <card.icon className={`h-6 w-6 ${
+                        card.color === 'blue' ? 'text-blue-600' :
+                        card.color === 'green' ? 'text-green-600' :
+                        card.color === 'yellow' ? 'text-yellow-600' :
+                        'text-purple-600'
+                      }`} />
                     </div>
                   </div>
                 </CardContent>
@@ -170,6 +212,19 @@ export default function AdminDashboard() {
             </motion.div>
           ))}
         </div>
+
+        {/* Analytics Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <AnalyticsChart
+            title="Website Analytics"
+            data={analyticsData}
+            timeRange="Last 30 days"
+          />
+        </motion.div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -183,8 +238,18 @@ export default function AdminDashboard() {
               <Card className="hover:shadow-lg transition-all hover:scale-105">
                 <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
-                    <div className={`h-10 w-10 bg-${action.color}-100 rounded-lg flex items-center justify-center`}>
-                      <action.icon className={`h-5 w-5 text-${action.color}-600`} />
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                      action.color === 'blue' ? 'bg-blue-100' :
+                      action.color === 'green' ? 'bg-green-100' :
+                      action.color === 'yellow' ? 'bg-yellow-100' :
+                      'bg-purple-100'
+                    }`}>
+                      <action.icon className={`h-5 w-5 ${
+                        action.color === 'blue' ? 'text-blue-600' :
+                        action.color === 'green' ? 'text-green-600' :
+                        action.color === 'yellow' ? 'text-yellow-600' :
+                        'text-purple-600'
+                      }`} />
                     </div>
                     <CardTitle className="text-lg">{action.title}</CardTitle>
                   </div>
@@ -195,7 +260,7 @@ export default function AdminDashboard() {
                   </p>
                   <Button 
                     className="w-full"
-                    onClick={() => window.location.href = action.href}
+                    onClick={() => router.push(action.href)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Open
@@ -246,8 +311,18 @@ export default function AdminDashboard() {
                 ].map((activity, index) => (
                   <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                     <div className="flex items-center space-x-3">
-                      <div className={`h-10 w-10 bg-${activity.color}-100 rounded-full flex items-center justify-center`}>
-                        <activity.icon className={`h-5 w-5 text-${activity.color}-600`} />
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                        activity.color === 'blue' ? 'bg-blue-100' :
+                        activity.color === 'green' ? 'bg-green-100' :
+                        activity.color === 'yellow' ? 'bg-yellow-100' :
+                        'bg-purple-100'
+                      }`}>
+                        <activity.icon className={`h-5 w-5 ${
+                          activity.color === 'blue' ? 'text-blue-600' :
+                          activity.color === 'green' ? 'text-green-600' :
+                          activity.color === 'yellow' ? 'text-yellow-600' :
+                          'text-purple-600'
+                        }`} />
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">{activity.action}</p>
@@ -266,220 +341,5 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
     </AdminLayout>
-  );
-}
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Pages</p>
-                  <p className="text-2xl font-bold">12</p>
-                </div>
-                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-sm">📄</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Active Services</p>
-                  <p className="text-2xl font-bold">6</p>
-                </div>
-                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 text-sm">⚙️</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">New Leads</p>
-                  <p className="text-2xl font-bold">8</p>
-                </div>
-                <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <span className="text-yellow-600 text-sm">👥</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
-                  <p className="text-2xl font-bold">24%</p>
-                </div>
-                <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 text-sm">📈</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Management Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                📄 Pages
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                Manage website pages and content
-              </p>
-              <div className="space-y-2">
-                <Button
-                  onClick={() => router.push("/admin/pages")}
-                  className="w-full"
-                  size="sm"
-                >
-                  Manage Pages
-                </Button>
-                <div className="text-xs text-gray-500">
-                  12 pages • 8 published
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                ⚙️ Services
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                Configure services and offerings
-              </p>
-              <div className="space-y-2">
-                <Button
-                  onClick={() => router.push("/admin/services")}
-                  className="w-full"
-                  size="sm"
-                >
-                  Manage Services
-                </Button>
-                <div className="text-xs text-gray-500">
-                  6 services • 6 active
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                👥 Leads
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                View and manage customer leads
-              </p>
-              <div className="space-y-2">
-                <Button
-                  onClick={() => router.push("/admin/leads")}
-                  className="w-full"
-                  size="sm"
-                >
-                  View Leads
-                </Button>
-                <div className="text-xs text-gray-500">
-                  8 new • 24% conversion
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                ⚙️ Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                Configure system settings
-              </p>
-              <div className="space-y-2">
-                <Button
-                  onClick={() => router.push("/admin/settings")}
-                  className="w-full"
-                  size="sm"
-                >
-                  Settings
-                </Button>
-                <div className="text-xs text-gray-500">
-                  System configuration
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 text-sm">👥</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">New lead from John Smith</p>
-                      <p className="text-sm text-gray-600">Web Development inquiry</p>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">2 hours ago</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 text-sm">📄</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">Page "About Us" updated</p>
-                      <p className="text-sm text-gray-600">Content changes published</p>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">5 hours ago</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <span className="text-yellow-600 text-sm">⚙️</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">New service "Cloud Migration" added</p>
-                      <p className="text-sm text-gray-600">Service published to website</p>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">1 day ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
   );
 }

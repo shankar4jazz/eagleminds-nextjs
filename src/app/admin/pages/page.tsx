@@ -62,60 +62,23 @@ export default function AdminPagesPage() {
   const fetchPages = async () => {
     try {
       setLoading(true);
-      // Mock data - replace with actual API call
-      const mockPages: Page[] = [
-        {
-          id: '1',
-          title: 'Home Page',
-          slug: 'home',
-          content: 'Welcome to EagleMinds Technologies - Your premier destination for cutting-edge web development and digital solutions.',
-          metaTitle: 'EagleMinds Technologies - Modern Web Development',
-          metaDesc: 'Leading web development company specializing in modern solutions',
-          status: 'PUBLISHED',
-          createdAt: new Date('2024-01-15'),
-          updatedAt: new Date('2024-01-16'),
-          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
-        },
-        {
-          id: '2',
-          title: 'About Us',
-          slug: 'about',
-          content: 'Learn more about our company, our mission, and our dedicated team of professionals.',
-          metaTitle: 'About EagleMinds Technologies',
-          metaDesc: 'Meet our team and learn about our mission',
-          status: 'PUBLISHED',
-          createdAt: new Date('2024-01-14'),
-          updatedAt: new Date('2024-01-15'),
-          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
-        },
-        {
-          id: '3',
-          title: 'Services',
-          slug: 'services',
-          content: 'Explore our comprehensive range of web development and digital services.',
-          metaTitle: 'Our Services - Web Development & More',
-          metaDesc: 'Comprehensive web development and digital solutions',
-          status: 'PUBLISHED',
-          createdAt: new Date('2024-01-13'),
-          updatedAt: new Date('2024-01-14'),
-          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
-        },
-        {
-          id: '4',
-          title: 'Contact',
-          slug: 'contact',
-          content: 'Get in touch with our team for your web development needs.',
-          metaTitle: 'Contact EagleMinds Technologies',
-          metaDesc: 'Contact us for your web development needs',
-          status: 'DRAFT',
-          createdAt: new Date('2024-01-12'),
-          updatedAt: new Date('2024-01-13'),
-          author: { name: 'Admin User', email: 'admin@eagleminds.com' }
-        }
-      ];
-      setPages(mockPages);
+      const response = await fetch('/api/admin/pages');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch pages');
+      }
+      
+      const data = await response.json();
+      // Convert date strings to Date objects
+      const pagesWithDates = (data.pages || []).map((page: any) => ({
+        ...page,
+        createdAt: new Date(page.createdAt),
+        updatedAt: new Date(page.updatedAt),
+      }));
+      setPages(pagesWithDates);
     } catch (error) {
       console.error('Error fetching pages:', error);
+      setPages([]);
     } finally {
       setLoading(false);
     }
@@ -123,18 +86,32 @@ export default function AdminPagesPage() {
 
   const handleCreate = async () => {
     try {
-      const newPage: Page = {
-        id: Date.now().toString(),
-        ...formData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        author: { name: 'Admin User', email: 'admin@eagleminds.com' }
+      const response = await fetch('/api/admin/pages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create page');
+      }
+
+      const newPage = await response.json();
+      // Convert date strings to Date objects
+      const pageWithDates = {
+        ...newPage,
+        createdAt: new Date(newPage.createdAt),
+        updatedAt: new Date(newPage.updatedAt),
       };
-      setPages([...pages, newPage]);
+      setPages([...pages, pageWithDates]);
       setShowCreateModal(false);
       resetForm();
     } catch (error) {
       console.error('Error creating page:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create page. Please try again.');
     }
   };
 
@@ -142,25 +119,53 @@ export default function AdminPagesPage() {
     if (!editingPage) return;
     
     try {
-      const updatedPages = pages.map(page => 
-        page.id === editingPage.id 
-          ? { ...page, ...formData, updatedAt: new Date() }
-          : page
-      );
-      setPages(updatedPages);
+      const response = await fetch('/api/admin/pages', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: editingPage.id, ...formData }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update page');
+      }
+
+      const updatedPage = await response.json();
+      // Convert date strings to Date objects
+      const pageWithDates = {
+        ...updatedPage,
+        createdAt: new Date(updatedPage.createdAt),
+        updatedAt: new Date(updatedPage.updatedAt),
+      };
+      setPages(pages.map(page => 
+        page.id === editingPage.id ? pageWithDates : page
+      ));
       setEditingPage(null);
       resetForm();
     } catch (error) {
       console.error('Error updating page:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update page. Please try again.');
     }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this page?')) {
       try {
+        const response = await fetch(`/api/admin/pages?id=${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to delete page');
+        }
+
         setPages(pages.filter(page => page.id !== id));
       } catch (error) {
         console.error('Error deleting page:', error);
+        alert(error instanceof Error ? error.message : 'Failed to delete page. Please try again.');
       }
     }
   };
@@ -241,7 +246,7 @@ export default function AdminPagesPage() {
                 <Filter className="h-4 w-4 text-gray-400" />
                 <select 
                   value={filterStatus} 
-                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  onChange={(e) => setFilterStatus(e.target.value as 'ALL' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED')}
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">All Status</option>
@@ -440,7 +445,7 @@ export default function AdminPagesPage() {
                       <select
                         id="status"
                         value={formData.status}
-                        onChange={(e) => setFormData({...formData, status: e.target.value as any})}
+                        onChange={(e) => setFormData({...formData, status: e.target.value as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'})}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="DRAFT">Draft</option>

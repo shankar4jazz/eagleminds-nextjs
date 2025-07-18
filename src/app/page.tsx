@@ -6,8 +6,36 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navigation } from "@/components/navigation";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [stats, setStats] = useState({
+    totalProjects: 50,
+    clientSatisfaction: 98,
+    totalServices: 6
+  });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/admin/dashboard');
+      if (response.ok) {
+        const data = await response.json();
+        setStats({
+          totalProjects: data.stats.totalLeads || 50, // Using leads as project inquiries
+          clientSatisfaction: 98, // Keep static for now
+          totalServices: data.stats.totalServices || 6
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Keep fallback values
+    }
+  };
+
   return (
     <div className="min-h-screen overflow-hidden">
       <Navigation />
@@ -93,16 +121,16 @@ export default function Home() {
                 className="grid grid-cols-1 sm:grid-cols-3 gap-6"
               >
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-                  <div className="text-4xl font-bold text-white mb-2">50+</div>
-                  <div className="text-white/70">Projects Delivered</div>
+                  <div className="text-4xl font-bold text-white mb-2">{stats.totalProjects}+</div>
+                  <div className="text-white/70">Project Inquiries</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-                  <div className="text-4xl font-bold text-white mb-2">98%</div>
+                  <div className="text-4xl font-bold text-white mb-2">{stats.clientSatisfaction}%</div>
                   <div className="text-white/70">Client Satisfaction</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-                  <div className="text-4xl font-bold text-white mb-2">24/7</div>
-                  <div className="text-white/70">Expert Support</div>
+                  <div className="text-4xl font-bold text-white mb-2">{stats.totalServices}</div>
+                  <div className="text-white/70">Services Offered</div>
                 </div>
               </motion.div>
             </div>

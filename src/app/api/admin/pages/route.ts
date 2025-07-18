@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !["ADMIN", "CONTENT_MANAGER", "MARKETING_MANAGER"].includes(session.user.role)) {
+    if (!session || !["ADMIN", "CONTENT_MANAGER"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -16,17 +16,17 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const status = searchParams.get("status");
 
-    const where = status ? { status } : {};
+    const where = status && status !== "ALL" ? { status } : {};
     const skip = (page - 1) * limit;
 
-    const [leads, total] = await Promise.all([
-      db.lead.findMany({
+    const [pages, total] = await Promise.all([
+      db.page.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: { updatedAt: "desc" },
         include: {
-          assignee: {
+          author: {
             select: {
               id: true,
               name: true,
@@ -35,11 +35,11 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      db.lead.count({ where }),
+      db.page.count({ where }),
     ]);
 
     return NextResponse.json({
-      leads,
+      pages,
       pagination: {
         page,
         limit,
@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Leads API error:", error);
+    console.error("Pages API error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch leads" },
+      { error: "Failed to fetch pages" },
       { status: 500 }
     );
   }
@@ -60,34 +60,44 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !["ADMIN", "CONTENT_MANAGER", "MARKETING_MANAGER"].includes(session.user.role)) {
+    if (!session || !["ADMIN", "CONTENT_MANAGER"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const data = await request.json();
     
     // Validate required fields
-    if (!data.name || !data.email || !data.service || !data.message) {
+    if (!data.title || !data.slug || !data.content) {
       return NextResponse.json(
-        { error: "Name, email, service, and message are required" },
+        { error: "Title, slug, and content are required" },
         { status: 400 }
       );
     }
 
-    const lead = await db.lead.create({
+    // Check if slug already exists
+    const existingPage = await db.page.findUnique({
+      where: { slug: data.slug }
+    });
+
+    if (existingPage) {
+      return NextResponse.json(
+        { error: "Page with this slug already exists" },
+        { status: 400 }
+      );
+    }
+
+    const page = await db.page.create({
       data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone || null,
-        company: data.company || null,
-        service: data.service,
-        message: data.message,
-        status: data.status || "NEW",
-        source: data.source || "ADMIN",
-        assignedTo: data.assignedTo || null,
+        title: data.title,
+        slug: data.slug,
+        content: data.content,
+        metaTitle: data.metaTitle || null,
+        metaDesc: data.metaDesc || null,
+        status: data.status || "DRAFT",
+        authorId: session.user.id,
       },
       include: {
-        assignee: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -97,36 +107,58 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(lead, { status: 201 });
+    return NextResponse.json(page, { status: 201 });
   } catch (error) {
-    console.error("Lead creation error:", error);
+    console.error("Page creation error:", error);
     return NextResponse.json(
-      { error: "Failed to create lead" },
+      { error: "Failed to create page" },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !["ADMIN", "CONTENT_MANAGER", "MARKETING_MANAGER"].includes(session.user.role)) {
+    if (!session || !["ADMIN", "CONTENT_MANAGER"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { leadId, status, assignedTo, ...updateData } = await request.json();
+    const { id, ...data } = await request.json();
 
-    const lead = await db.lead.update({
-      where: { id: leadId },
+    if (!id) {
+      return NextResponse.json(
+        { error: "Page ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // If slug is being updated, check for conflicts
+    if (data.slug) {
+      const existingPage = await db.page.findFirst({
+        where: { 
+          slug: data.slug,
+          NOT: { id }
+        }
+      });
+
+      if (existingPage) {
+        return NextResponse.json(
+          { error: "Page with this slug already exists" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const page = await db.page.update({
+      where: { id },
       data: {
-        ...updateData,
-        status,
-        assignedTo,
+        ...data,
         updatedAt: new Date(),
       },
       include: {
-        assignee: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -136,11 +168,11 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(lead);
+    return NextResponse.json(page);
   } catch (error) {
-    console.error("Lead update error:", error);
+    console.error("Page update error:", error);
     return NextResponse.json(
-      { error: "Failed to update lead" },
+      { error: "Failed to update page" },
       { status: 500 }
     );
   }
@@ -159,20 +191,20 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Lead ID is required" },
+        { error: "Page ID is required" },
         { status: 400 }
       );
     }
 
-    await db.lead.delete({
+    await db.page.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: "Lead deleted successfully" });
+    return NextResponse.json({ message: "Page deleted successfully" });
   } catch (error) {
-    console.error("Lead deletion error:", error);
+    console.error("Page deletion error:", error);
     return NextResponse.json(
-      { error: "Failed to delete lead" },
+      { error: "Failed to delete page" },
       { status: 500 }
     );
   }
